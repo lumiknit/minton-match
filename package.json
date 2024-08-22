@@ -1,23 +1,30 @@
 {
-  "name": "minton-match",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "solid-js": "^1.8.20"
-  },
-  "devDependencies": {
-    "bootstrap": "^5.3.3",
-    "eslint": "^9.9.0",
-    "prettier": "^3.3.3",
-    "solid-toast": "^0.5.0",
-    "typescript": "^5.5.3",
-    "vite": "^5.4.1",
-    "vite-plugin-solid": "^2.10.2"
-  }
+	"name": "minton-match",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"preview": "vite preview",
+		"size-report": "vite-bundle-visualizer",
+		"format": "prettier --write .",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@picocss/pico": "^2.0.6",
+		"solid-js": "^1.8.20"
+	},
+	"devDependencies": {
+		"eslint": "^9.9.0",
+		"eslint-plugin-solid": "^0.14.2",
+		"prettier": "^3.3.3",
+		"sass": "^1.77.8",
+		"solid-icons": "^1.1.0",
+		"solid-toast": "^0.5.0",
+		"typescript": "^5.5.3",
+		"vite": "^5.4.1",
+		"vite-bundle-visualizer": "^1.2.1",
+		"vite-plugin-solid": "^2.10.2"
+	}
 }

@@ -1,0 +1,36 @@
+:root {
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	color-scheme: light dark;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	--pico-spacing: .5rem;
+	--pico-form-element-spacing-vertical: .5rem;
+	--pico-form-element-spacing-horizontal: .5rem;
+}
+
+#root {
+	margin: .5rem;
+}
+
+.w-100 {
+	width: 100%;
+}
+
+div.half {
+	display: flex;
+	flex-direction: row;
+	align-items: start;
+	justify-content: stretch;
+	gap: var(--pico-spacing);
+
+	& > * {
+		flex: 1;
+	}
+}
