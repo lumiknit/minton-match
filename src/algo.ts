@@ -2,7 +2,6 @@ import {
 	CourtGame,
 	FEMALE_TEAM1_PREFIX,
 	FEMALE_TEAM2_PREFIX,
-	Game,
 	GameSet,
 	InputStruct,
 	MALE_TEAM1_PREFIX,
@@ -10,6 +9,19 @@ import {
 	MatchResult,
 	newCourtGame,
 } from "./types";
+
+type Pair = {
+	mem1: string;
+	mem2: string;
+	power: number;
+};
+
+/** idx should between 0.0 to 1.0, 0.0 is most powerful */
+const calcPower = (m1idx: number, m2idx: number): number => {
+	const avg = (m1idx + m2idx) / 2;
+	const rand = Math.random() * 0.05 - 0.025;
+	return avg + rand;
+};
 
 const randomInt = (n: number) => Math.floor(Math.random() * n);
 
@@ -38,14 +50,6 @@ const decreaseLeftGame = (left: Map<string, number>, ps: string[]) => {
 	for (const p of ps) left.set(p, left.get(p)! - 1);
 };
 
-const splitHalf = (team: string[]) => {
-	const half = Math.floor(team.length / 2);
-	const t1 = team.slice(0, half);
-	const t2 = team.slice(half);
-	console.log(t1, t2);
-	return [t1, t2];
-};
-
 /** Pick randomly. If there is left > 0, prefer that */
 const randomPick = (mem: string[], left: number[]) => {
 	// Filtered
@@ -58,42 +62,137 @@ const randomPick = (mem: string[], left: number[]) => {
 	return mem[randomInt(mem.length)];
 };
 
-export const findFunSameGames = (
+/** Find similar power memebers to pairs */
+export const generateHardGamePairs = (
+	members: string[],
+	count: number,
+	minPairs: number = 0,
+): Pair[] => {
+	const left = initLeftGames([members], count);
+
+	const pairs: Pair[] = [];
+	// From the most powerful member, match
+	for (let i = 0; i < members.length; i++) {
+		const l = left.get(members[i])!;
+		// Should pick l times
+		const picked: string[] = [];
+		let first = true;
+		while (picked.length < l) {
+			for (let j = i + 1; j < members.length; j++) {
+				if (picked.length >= l) break;
+				if (first && left.get(members[j])! <= 0) continue;
+				// Drop in 20% chance
+				if (Math.random() < 0.2) continue;
+				picked.push(members[j]);
+				decreaseLeftGame(left, [members[i], members[j]]);
+			}
+			first = false;
+		}
+
+		// Push to pairs
+		for (const p of picked) {
+			const m1pw = i / members.length;
+			const m2pw = members.indexOf(p) / members.length;
+			pairs.push({
+				mem1: members[i],
+				mem2: p,
+				power: calcPower(m1pw, m2pw),
+			});
+		}
+	}
+
+	while (pairs.length < minPairs) {
+		const m1 = randomPick(
+			members,
+			members.map(p => left.get(p)!),
+		);
+		const m1pw = members.indexOf(m1) / members.length;
+		const m2 = randomPick(
+			members,
+			members.map(p => left.get(p)!),
+		);
+		const m2pw = members.indexOf(m2) / members.length;
+
+		decreaseLeftGame(left, [m1, m2]);
+
+		pairs.push({
+			mem1: m1,
+			mem2: m2,
+			power: calcPower(m1pw, m2pw),
+		});
+	}
+
+	return pairs;
+};
+
+/** Match senior and junior */
+export const generateFunGamePairs = (
+	members: string[],
+	count: number,
+	minPairs: number = 0,
+): Pair[] => {
+	const left = initLeftGames([members], count);
+
+	// Split teams two half
+	const half = Math.floor(members.length / 2);
+	const [t1, t2] = [members.slice(0, half), members.slice(half)];
+
+	const pairs: Pair[] = [];
+	for (;;) {
+		if (allNonPositive(left) && pairs.length >= minPairs) break;
+
+		const m1 = randomPick(
+			t1,
+			t1.map(p => left.get(p)!),
+		);
+		const m1pw = members.indexOf(m1) / members.length;
+		const m2 = randomPick(
+			t2,
+			t2.map(p => left.get(p)!),
+		);
+		const m2pw = members.indexOf(m2) / members.length;
+
+		decreaseLeftGame(left, [m1, m2]);
+
+		pairs.push({
+			mem1: m1,
+			mem2: m2,
+			power: calcPower(m1pw, m2pw),
+		});
+	}
+
+	return pairs;
+};
+
+export const findGames = (
 	team1: string[],
 	team2: string[],
 	count: number,
+	pairMethod: (members: string[], count: number, minPairs?: number) => Pair[],
 ) => {
-	// Initialize
-	const left = initLeftGames([team1, team2], count);
+	let pairs1: Pair[];
+	let pairs2: Pair[];
+	// Create pairs
+	if (team1.length < team2.length) {
+		pairs2 = pairMethod(team2, count);
+		pairs1 = pairMethod(team1, count, pairs2.length);
+	} else {
+		pairs1 = pairMethod(team1, count);
+		pairs2 = pairMethod(team2, count, pairs1.length);
+	}
 
-	// Split teams two half
-	const [t11, t12] = splitHalf(team1);
-	const [t21, t22] = splitHalf(team2);
+	// Sort by power
+	pairs1.sort((a, b) => b.power - a.power);
+	pairs2.sort((a, b) => b.power - a.power);
 
+	console.log(pairs1, pairs2);
+
+	// Create games
 	const games: CourtGame[] = [];
-	for (;;) {
-		if (allNonPositive(left)) break;
-
-		const m11 = randomPick(
-			t11,
-			t11.map(p => left.get(p)!),
-		);
-		const m12 = randomPick(
-			t12,
-			t12.map(p => left.get(p)!),
-		);
-		const m21 = randomPick(
-			t21,
-			t21.map(p => left.get(p)!),
-		);
-		const m22 = randomPick(
-			t22,
-			t22.map(p => left.get(p)!),
-		);
-
-		decreaseLeftGame(left, [m11, m12, m21, m22]);
-
-		games.push(newCourtGame([m11, m12], [m21, m22]));
+	for (let i = 0; i < pairs1.length; i++) {
+		const p1 = pairs1[i];
+		const p2 = pairs2[i];
+		games.push(newCourtGame([p1.mem1, p1.mem2], [p2.mem1, p2.mem2]));
 	}
 
 	return games;
@@ -150,21 +249,24 @@ export const findTwoTeamGames = (x: InputStruct): MatchResult => {
 	const team2f = x.fPlayers2.map(name => FEMALE_TEAM2_PREFIX + name);
 
 	// Member lists
-	const males = [...team1m, ...team2m];
-	const females = [...team1f, ...team2f];
-	const players = [...males, ...females];
+	const mmFun = findGames(team1m, team2m, x.mFunGames, generateFunGamePairs);
+	const ffFun = findGames(team1f, team2f, x.fFunGames, generateFunGamePairs);
+	const mmHard = findGames(team1m, team2m, x.mHardGames, generateHardGamePairs);
+	const ffHard = findGames(team1f, team2f, x.fHardGames, generateHardGamePairs);
 
-	const mmFun = findFunSameGames(team1m, team2m, x.mFunGames);
-	const ffFun = findFunSameGames(team1f, team2f, x.fFunGames);
-
-	console.log(mmFun);
-	console.log(ffFun);
+	const allGames = [...mmFun, ...ffFun, ...mmHard, ...ffHard];
 
 	// Assign courts.
 	// Repeat some times, and pick the best one
-	let bestGames: GameSet[] = assignCourts([...mmFun, ...ffFun], x.numCourts);
+	let bestGames: GameSet[] = assignCourts(
+		[...mmFun, ...ffFun, ...mmHard, ...ffHard],
+		x.numCourts,
+	);
 	for (let i = 0; i < 10; i++) {
-		const games = assignCourts([...mmFun, ...ffFun], x.numCourts);
+		const games = assignCourts(
+			[...mmFun, ...ffFun, ...mmHard, ...ffHard],
+			x.numCourts,
+		);
 		if (games.length < bestGames.length) {
 			bestGames = games;
 		}

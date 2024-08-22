@@ -1,4 +1,4 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 import toast, { Toaster } from "solid-toast";
 
@@ -8,7 +8,7 @@ import { findTwoTeamGames } from "./algo";
 import ResultView from "./ResultView";
 
 const App = () => {
-	const [submitted, setSubmitted] = createSignal<boolean>(false);
+	const [_, setSubmitted] = createSignal<boolean>(false);
 
 	const [rawResult, setRawResult] = createSignal<any>(null);
 	const [result, setResult] = createSignal<MatchResult | null>(null);
