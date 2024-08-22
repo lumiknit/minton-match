@@ -10,13 +10,13 @@
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 
-	--pico-spacing: .5rem;
-	--pico-form-element-spacing-vertical: .5rem;
-	--pico-form-element-spacing-horizontal: .5rem;
+	--pico-spacing: 0.5rem;
+	--pico-form-element-spacing-vertical: 0.5rem;
+	--pico-form-element-spacing-horizontal: 0.5rem;
 }
 
 #root {
-	margin: .5rem;
+	margin: 0.5rem;
 }
 
 .w-100 {
@@ -33,4 +33,10 @@ div.half {
 	& > * {
 		flex: 1;
 	}
+}
+
+.game-cell {
+	padding: 0.25rem;
+	border-radius: 0.5rem;
+	text-align: center;
 }
