@@ -61,7 +61,7 @@ const PlayerRow: Component<{ player: Player }> = props => {
 		<tr>
 			<td class={"" + genderClass(props.player.gender)}>{name()}</td>
 			<td> {props.player.games.length} </td>
-			<td>{props.player.games.map(x => `${x.court}-${x.index}`).join(", ")}</td>
+			<td>{props.player.games.map(x => `${1 + x.court}-${1 + x.index}`).join(", ")}</td>
 		</tr>
 	);
 };

@@ -94,13 +94,23 @@ export const generateHardGamePairs = (
 
 	const pairs: Pair[] = [];
 	// From the most powerful member, match
-	for (let i = 0; i < members.length - 1; i++) {
+	for (let i = 0; i < members.length; i++) {
 		const l = left.get(members[i])!;
 		// Should pick l times
 		const picked: string[] = [];
 		let first = true;
+		let dj, start, end;
+		if (i === members.length - 1) {
+			dj = -1;
+			start = members.length - 2;
+			end = -1;
+		} else {
+			dj = 1;
+			start = i + 1;
+			end = members.length;
+		}
 		while (picked.length < l) {
-			for (let j = i + 1; j < members.length; j++) {
+			for (let j = start; j !== end; j += dj) {
 				if (picked.length >= l) break;
 				if (first && left.get(members[j])! <= 0) continue;
 				// Drop in 20% chance
