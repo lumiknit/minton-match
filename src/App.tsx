@@ -6,6 +6,7 @@ import InputForm from "./InputForm";
 import { InputStruct, MatchResult } from "./types";
 import { findTwoTeamGames, reassignCourts } from "./algo";
 import ResultView from "./ResultView";
+import { TbBrandGithub } from "solid-icons/tb";
 
 const App = () => {
 	const [courts, setCourts] = createSignal<number>(0);
@@ -54,6 +55,13 @@ const App = () => {
 	return (
 		<>
 			<Toaster />
+			<h1>
+				민턴 매치
+				<a href="https://github.com/lumiknit/minton-match">
+					<TbBrandGithub />
+					Github
+				</a>
+			</h1>
 			<InputForm onSubmit={handleSubmit} />
 			<Show when={result()}>
 				<hr />

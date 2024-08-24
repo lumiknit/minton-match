@@ -1,6 +1,7 @@
 import { Component, createSignal, onMount } from "solid-js";
 import { InputStruct, loadInputStruct, saveInputStruct } from "./types";
 import TextArea from "./TextArea";
+import toast from "solid-toast";
 
 type Props = {
 	onSubmit: (form: InputStruct) => void;
@@ -110,7 +111,52 @@ const InputForm: Component<Props> = props => {
 	};
 
 	const handleSubmitClick = () => {
-		props.onSubmit(packInput());
+		const p = packInput();
+
+		// Validate input
+		if (!(p.numCourts >= 1)) {
+			toast.error("코트 수는 1 이상이어야 합니다.");
+			return;
+		}
+		p.numCourts = Math.floor(p.numCourts);
+
+		if (p.mPlayers1.length < 1 && p.fPlayers1.length < 1) {
+			toast.error("팀 1에 아무도 없어요!");
+			return;
+		}
+
+		if (p.mPlayers2.length < 1 && p.fPlayers2.length < 1) {
+			toast.error("팀 2에 아무도 없어요!");
+			return;
+		}
+
+		if (!(p.mFunGames >= 0)) {
+			toast.error("남자 즐겜 수는 0 이상이어야 합니다.");
+			return;
+		}
+		if (!(p.mHardGames >= 0)) {
+			toast.error("남자 빡겜 수는 0 이상이어야 합니다.");
+			return;
+		}
+		if (!(p.fFunGames >= 0)) {
+			toast.error("여자 즐겜 수는 0 이상이어야 합니다.");
+			return;
+		}
+		if (!(p.fHardGames >= 0)) {
+			toast.error("여자 빡겜 수는 0 이상이어야 합니다.");
+			return;
+		}
+		if (!(p.xGames >= 0)) {
+			toast.error("혼복 즐겜 수는 0 이상이어야 합니다.");
+			return;
+		}
+		p.mFunGames = Math.floor(p.mFunGames);
+		p.mHardGames = Math.floor(p.mHardGames);
+		p.fFunGames = Math.floor(p.fFunGames);
+		p.fHardGames = Math.floor(p.fHardGames);
+		p.xGames = Math.floor(p.xGames);
+
+		props.onSubmit(p);
 	};
 
 	onMount(() => {
@@ -123,7 +169,6 @@ const InputForm: Component<Props> = props => {
 
 	return (
 		<>
-			<h1>민턴 매치</h1>
 			<h2> 명단 </h2>
 			<p>
 				아래 명단에 이름을 <b>실력순으로</b> 작성해주세요! 제일 위에 있는 사람이

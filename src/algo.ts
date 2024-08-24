@@ -181,6 +181,8 @@ export const findGames = (
 	count: number,
 	pairMethod: (members: string[], count: number, minPairs?: number) => Pair[],
 ) => {
+	if (team1.length === 0 || team2.length === 0) return [];
+
 	let pairs1: Pair[];
 	let pairs2: Pair[];
 	// Create pairs
@@ -256,6 +258,10 @@ export const findMixedGames = (
 		minPairs?: number,
 	) => Pair[],
 ) => {
+	if (m1.length === 0 || m2.length === 0 || f1.length === 0 || f2.length === 0) {
+		return [];
+	}
+
 	let pairs1 = pairMethod(m1, f1, count);
 	let pairs2 = pairMethod(m2, f2, count);
 	if (pairs1.length < pairs2.length) {

@@ -1,28 +1,15 @@
-## Usage
+# minton-match
 
-```bash
-$ npm install # or pnpm install or yarn install
-```
+배드민턴 복식 매치 생성기.
+인원을 입력하면 남복/여복/혼복을 적당히 짭니다.
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+https://lumiknit.github.io/apps/minton-match
 
-## Available Scripts
+## 사용법
 
-In the project directory, you can run:
-
-### `npm run dev`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
-
-### `npm run build`
-
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html)
+- 경기할 사람 이름을 팀1, 팀2에 나눠서 입력합니다.
+	- 한 줄에 한 명씩, 특수문자 없이 이름만 적어주세요. 중복이 있으면 안 됩니다..!
+- 코트 수 및 인당 몇 게임을 할지 입력합니다.
+  - 지정한 게임 수는 '최소' 게임 수 입니다. 인원이 더 적은 쪽 팀은 몇 게임 더 이루어질 수 있습니다.
+- '만들기' 버튼을 누르면 게임이 생성됩니다.
+	- 필요하다면 `.xlsx` 로 저장할 수 있습니다.
