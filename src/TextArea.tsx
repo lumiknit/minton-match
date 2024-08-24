@@ -1,7 +1,8 @@
-import { Component, splitProps } from "solid-js";
+import { Component, createEffect, splitProps } from "solid-js";
 import { JSX } from "solid-js";
 
 type Props = JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+	value?: string;
 	onValue?: (value: string) => void;
 };
 
@@ -26,6 +27,13 @@ const TextArea: Component<Props> = props => {
 		hiddenRef!.style.width = `${ref!.clientWidth}px`;
 		ref!.style.height = 24 + hiddenRef!.scrollHeight + "px";
 	};
+
+	createEffect(() => {
+		if (props.value !== undefined && props.value !== ref!.value) {
+			ref!.value = props.value;
+			resize();
+		}
+	});
 
 	return (
 		<>

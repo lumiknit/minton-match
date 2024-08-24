@@ -8,6 +8,7 @@ import {
 	MALE_TEAM2_PREFIX,
 	MatchResult,
 	newCourtGame,
+	Player,
 } from "./types";
 
 type Pair = {
@@ -72,7 +73,7 @@ export const generateHardGamePairs = (
 
 	const pairs: Pair[] = [];
 	// From the most powerful member, match
-	for (let i = 0; i < members.length; i++) {
+	for (let i = 0; i < members.length - 1; i++) {
 		const l = left.get(members[i])!;
 		// Should pick l times
 		const picked: string[] = [];
@@ -185,8 +186,6 @@ export const findGames = (
 	pairs1.sort((a, b) => b.power - a.power);
 	pairs2.sort((a, b) => b.power - a.power);
 
-	console.log(pairs1, pairs2);
-
 	// Create games
 	const games: CourtGame[] = [];
 	for (let i = 0; i < pairs1.length; i++) {
@@ -238,6 +237,44 @@ const assignCourts = (games: CourtGame[], numCourts: number): GameSet[] => {
 	return gameSets;
 };
 
+const updatePlayers = (
+	mPlayers: string[],
+	fPlayers: string[],
+	games: GameSet[],
+) => {
+	const playerSet = new Map<string, Player>();
+	for (const n of mPlayers) {
+		playerSet.set(n, {
+			name: n,
+			gender: "M",
+			games: [],
+		});
+	}
+	for (const n of fPlayers) {
+		playerSet.set(n, {
+			name: n,
+			gender: "F",
+			games: [],
+		});
+	}
+
+	// Update games
+	for (let i = 0; i < games.length; i++) {
+		const set = games[i];
+		for (let j = 0; j < set.length; j++) {
+			const court = set[j];
+			for (const [p] of court.players.entries()) {
+				playerSet.get(p)!.games.push({
+					court: i,
+					index: j,
+				});
+			}
+		}
+	}
+
+	return Array.from(playerSet.values());
+};
+
 /**
  * Find two team games
  */
@@ -273,7 +310,11 @@ export const findTwoTeamGames = (x: InputStruct): MatchResult => {
 	}
 
 	return {
-		players: [],
+		players: updatePlayers(
+			[...team1m, ...team2m],
+			[...team1f, ...team2f],
+			bestGames,
+		),
 		games: bestGames,
 	};
 };

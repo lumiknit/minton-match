@@ -46,6 +46,21 @@ export type InputStruct = {
 	xHardGames: number;
 };
 
+export const saveInputStruct = (x: InputStruct) => {
+	// Save to local storage
+	localStorage.setItem("input", JSON.stringify(x));
+	console.log("Saved input", x);
+};
+
+export const loadInputStruct = (): InputStruct | null => {
+	const x = localStorage.getItem("input");
+	console.log("Loaded input", x);
+	if (x === null) {
+		return null;
+	}
+	return JSON.parse(x);
+};
+
 export type Game = {
 	court: number;
 	index: number;

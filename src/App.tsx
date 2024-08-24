@@ -10,11 +10,9 @@ import ResultView from "./ResultView";
 const App = () => {
 	const [_, setSubmitted] = createSignal<boolean>(false);
 
-	const [rawResult, setRawResult] = createSignal<any>(null);
 	const [result, setResult] = createSignal<MatchResult | null>(null);
 
 	const handleSubmit = (input: InputStruct) => {
-		console.log(input);
 		setSubmitted(true);
 
 		const run = async () => {
@@ -31,7 +29,6 @@ const App = () => {
 					}
 				}
 			});
-			setRawResult(r);
 			setResult(result);
 		};
 
@@ -49,7 +46,6 @@ const App = () => {
 			<Show when={result()}>
 				<ResultView result={result()!} />
 			</Show>
-			<pre>{rawResult()}</pre>
 		</>
 	);
 };

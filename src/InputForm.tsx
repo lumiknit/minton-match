@@ -1,5 +1,5 @@
 import { Component, createSignal, onMount } from "solid-js";
-import { InputStruct } from "./types";
+import { InputStruct, loadInputStruct, saveInputStruct } from "./types";
 import TextArea from "./TextArea";
 
 type Props = {
@@ -31,6 +31,35 @@ const InputForm: Component<Props> = props => {
 	let xFunGamesRef: HTMLInputElement | null = null;
 	let xHardGamesRef: HTMLInputElement | null = null;
 
+	const packInput = (): InputStruct => ({
+		mPlayers1: mPlayers1(),
+		fPlayers1: fPlayers1(),
+		mPlayers2: mPlayers2(),
+		fPlayers2: fPlayers2(),
+		numCourts: parseInt(numCourtsRef!.value),
+		mFunGames: parseInt(mFunGamesRef!.value),
+		mHardGames: parseInt(mHardGamesRef!.value),
+		fFunGames: parseInt(fFunGamesRef!.value),
+		fHardGames: parseInt(fHardGamesRef!.value),
+		xFunGames: parseInt(xFunGamesRef!.value),
+		xHardGames: parseInt(xHardGamesRef!.value),
+	});
+
+	const unpackInput = (x: InputStruct) => {
+		setMPlayers1(x.mPlayers1);
+		setFPlayers1(x.fPlayers1);
+		setMPlayers2(x.mPlayers2);
+		setFPlayers2(x.fPlayers2);
+
+		numCourtsRef!.value = x.numCourts.toString();
+		mFunGamesRef!.value = x.mFunGames.toString();
+		mHardGamesRef!.value = x.mHardGames.toString();
+		fFunGamesRef!.value = x.fFunGames.toString();
+		fHardGamesRef!.value = x.fHardGames.toString();
+		xFunGamesRef!.value = x.xFunGames.toString();
+		xHardGamesRef!.value = x.xHardGames.toString();
+	};
+
 	const handleMPlayers1Change = (value: string) => {
 		setMPlayers1(
 			value
@@ -38,6 +67,7 @@ const InputForm: Component<Props> = props => {
 				.map(x => x.trim())
 				.filter(Boolean),
 		);
+		saveInputStruct(packInput());
 	};
 
 	const handleFPlayers1Change = (value: string) => {
@@ -47,6 +77,7 @@ const InputForm: Component<Props> = props => {
 				.map(x => x.trim())
 				.filter(Boolean),
 		);
+		saveInputStruct(packInput());
 	};
 
 	const handleMPlayers2Change = (value: string) => {
@@ -56,6 +87,7 @@ const InputForm: Component<Props> = props => {
 				.map(x => x.trim())
 				.filter(Boolean),
 		);
+		saveInputStruct(packInput());
 	};
 
 	const handleFPlayers2Change = (value: string) => {
@@ -65,6 +97,7 @@ const InputForm: Component<Props> = props => {
 				.map(x => x.trim())
 				.filter(Boolean),
 		);
+		saveInputStruct(packInput());
 	};
 
 	const handleUpdateGames = () => {
@@ -77,26 +110,18 @@ const InputForm: Component<Props> = props => {
 
 		setMGames(mFunGames + mHardGames + xFunGames + xHardGames);
 		setFGames(fFunGames + fHardGames + xFunGames + xHardGames);
+		saveInputStruct(packInput());
 	};
 
 	const handleSubmitClick = () => {
-		const form: InputStruct = {
-			mPlayers1: mPlayers1(),
-			fPlayers1: fPlayers1(),
-			mPlayers2: mPlayers2(),
-			fPlayers2: fPlayers2(),
-			numCourts: parseInt(numCourtsRef!.value),
-			mFunGames: parseInt(mFunGamesRef!.value),
-			mHardGames: parseInt(mHardGamesRef!.value),
-			fFunGames: parseInt(fFunGamesRef!.value),
-			fHardGames: parseInt(fHardGamesRef!.value),
-			xFunGames: parseInt(xFunGamesRef!.value),
-			xHardGames: parseInt(xHardGamesRef!.value),
-		};
-		props.onSubmit(form);
+		props.onSubmit(packInput());
 	};
 
 	onMount(() => {
+		const x = loadInputStruct();
+		if (x !== null) {
+			unpackInput(x);
+		}
 		handleUpdateGames();
 	});
 
@@ -119,6 +144,7 @@ const InputForm: Component<Props> = props => {
 						남자 ({mPlayers1().length} 명)
 						<TextArea
 							placeholder={"홍길동\n김철수\n이영희"}
+							value={mPlayers1().join("\n")}
 							onValue={handleMPlayers1Change}
 						/>
 					</label>
@@ -128,6 +154,7 @@ const InputForm: Component<Props> = props => {
 						여자 ({fPlayers1().length} 명)
 						<TextArea
 							placeholder={"홍길동\n김철수\n이영희"}
+							value={fPlayers1().join("\n")}
 							onValue={handleFPlayers1Change}
 						/>
 					</label>
@@ -142,6 +169,7 @@ const InputForm: Component<Props> = props => {
 						남자 ({mPlayers2().length} 명)
 						<TextArea
 							placeholder={"홍길동\n김철수\n이영희"}
+							value={mPlayers2().join("\n")}
 							onValue={handleMPlayers2Change}
 						/>
 					</label>
@@ -151,6 +179,7 @@ const InputForm: Component<Props> = props => {
 						여자 ({fPlayers2().length} 명)
 						<TextArea
 							placeholder={"홍길동\n김철수\n이영희"}
+							value={fPlayers2().join("\n")}
 							onValue={handleFPlayers2Change}
 						/>
 					</label>
