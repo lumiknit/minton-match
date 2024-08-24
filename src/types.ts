@@ -1,3 +1,5 @@
+import XLSX from "xlsx";
+
 export const MALE_TEAM1_PREFIX = "M1-";
 export const MALE_TEAM2_PREFIX = "M2-";
 export const FEMALE_TEAM1_PREFIX = "F1-";
@@ -40,10 +42,7 @@ export type InputStruct = {
 	fHardGames: number;
 
 	/** Mixed fun game count */
-	xFunGames: number;
-
-	/** Mixed hard game count */
-	xHardGames: number;
+	xGames: number;
 };
 
 export const saveInputStruct = (x: InputStruct) => {
@@ -103,4 +102,73 @@ export type GameSet = CourtGame[];
 export type MatchResult = {
 	players: Player[];
 	games: GameSet[];
+};
+
+// Excel converter
+
+/**
+ * Convert a match result to an array of arrays
+ *
+ * Columns:
+ * - Col1: Game index.
+ * - Col2-3: Court 0 (Team 1, Team 2)
+ * - Col4-5: Court 1 (Team 1, Team 2)
+ * - ...
+ *
+ * Rows:
+ * - Row1: Category (Game, Court1, Court2, ...)
+ * - Row2: Subcategory (Only for each courts, 0, 1, ...)
+ * - Row3, 4: Game1's team1 / team2 (left is team1, right is team2)
+ * - Row5, 6: Game2's team1 / team2
+ * - ...
+ */
+const matchResultToAOA = (result: MatchResult): any[][] => {
+	// Find court counts and game counts
+	const courtCounts = result.games[0].length;
+	const gameCounts = result.games.length;
+
+	const category = ["게임"];
+	const subcategory = [""];
+	for (let i = 0; i < courtCounts; i++) {
+		category.push(`코트 ${1 + i}`, "");
+		subcategory.push("팀1", "팀2");
+	}
+
+	const games = [];
+	for (let i = 0; i < gameCounts; i++) {
+		const row1: any[] = [1 + i];
+		const row2: any[] = [""];
+		const game = result.games[i];
+		for (const g of game) {
+			row1.push(removePrefix(g.team1[0]), removePrefix(g.team2[0]));
+			row2.push(removePrefix(g.team1[1]), removePrefix(g.team2[1]));
+		}
+		games.push(row1, row2);
+	}
+
+	return [category, subcategory, ...games];
+};
+
+export const matchResultToCSV = (result: MatchResult): string => {
+	const aoa = matchResultToAOA(result);
+	let csv = "";
+	for (const row of aoa) {
+		csv += row.join(",") + "\n";
+	}
+	return csv;
+};
+
+export const downloadMatchResultToXLSX = (
+	result: MatchResult,
+	filename: string,
+): void => {
+	const ws = XLSX.utils.aoa_to_sheet(matchResultToAOA(result));
+	console.log(ws);
+
+	// Set-up workbook
+	const workbook = XLSX.utils.book_new();
+	XLSX.utils.book_append_sheet(workbook, ws, "Games");
+
+	// Write
+	XLSX.writeFile(workbook, filename, { compression: true });
 };

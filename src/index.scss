@@ -15,6 +15,12 @@
 	--pico-form-element-spacing-horizontal: 0.5rem;
 }
 
+h1,
+h2,
+h3 {
+	--pico-typography-spacing-top: 0.5rem !important;
+}
+
 #root {
 	margin: 0.5rem;
 }
@@ -32,6 +38,20 @@ div.half {
 
 	& > * {
 		flex: 1;
+		overflow: hidden;
+	}
+}
+
+div.mult-dense {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: stretch;
+	gap: var(--pico-spacing);
+
+	& > *:first-child,
+	& > *:last-child {
+		flex: 1 0 auto;
 	}
 }
 
@@ -39,4 +59,13 @@ div.half {
 	padding: 0.25rem;
 	border-radius: 0.5rem;
 	text-align: center;
+}
+
+.hori-scroll {
+	overflow-x: auto;
+	overflow-y: hidden;
+
+	& > * {
+		width: max-content;
+	}
 }

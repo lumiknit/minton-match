@@ -11,6 +11,42 @@ import {
 	Player,
 } from "./types";
 
+// Utilities
+
+/** Split array to half */
+const splitHalf = <T>(arr: T[]): [T[], T[]] => {
+	const half = Math.floor(arr.length / 2);
+	return [arr.slice(0, half), arr.slice(half)];
+};
+
+/** Pick a random number */
+const randomInt = (n: number) => Math.floor(Math.random() * n);
+
+/** Check all values is positive */
+const allNonPositive = <T>(m: Map<T, number>) =>
+	Array.from(m.values()).every(v => v <= 0);
+
+/**
+ * Pick random member
+ * If there is left count, prefers that.
+ * If every member has 0 left, pick one from the max count.
+ */
+const pickRandom = (members: string[], left: Map<string, number>): string => {
+	// First, filter out the members with left > 0
+	const filtered = members.filter(m => left.get(m)! > 0);
+	if (filtered.length > 0) {
+		return filtered[randomInt(filtered.length)];
+	}
+
+	// If all left is 0, pick one from the max count
+	const max = Math.max(...members.map(m => left.get(m)!));
+	const maxMembers = members.filter(m => left.get(m)! === max);
+	return maxMembers[randomInt(maxMembers.length)];
+};
+
+/**
+ * Represents a pair of members with their corresponding power.
+ */
 type Pair = {
 	mem1: string;
 	mem2: string;
@@ -24,14 +60,11 @@ const calcPower = (m1idx: number, m2idx: number): number => {
 	return avg + rand;
 };
 
-const randomInt = (n: number) => Math.floor(Math.random() * n);
-
-const allNonPositive = (m: Map<string, number>) => {
-	let done = true;
-	m.forEach(v => {
-		done &&= v <= 0;
-	});
-	return done;
+/** Calculate mixed-double power, the second member considered weak */
+const calcMixedPower = (m1idx: number, m2idx: number): number => {
+	const avg = (m1idx + m2idx * 0.5) / 2;
+	const rand = Math.random() * 0.05 - 0.025;
+	return avg + rand;
 };
 
 const initLeftGames = (
@@ -49,18 +82,6 @@ const initLeftGames = (
 
 const decreaseLeftGame = (left: Map<string, number>, ps: string[]) => {
 	for (const p of ps) left.set(p, left.get(p)! - 1);
-};
-
-/** Pick randomly. If there is left > 0, prefer that */
-const randomPick = (mem: string[], left: number[]) => {
-	// Filtered
-	const filtered = mem.filter((_, i) => left[i] > 0);
-	if (filtered.length > 0) {
-		return filtered[randomInt(filtered.length)];
-	}
-
-	// Random
-	return mem[randomInt(mem.length)];
 };
 
 /** Find similar power memebers to pairs */
@@ -103,15 +124,9 @@ export const generateHardGamePairs = (
 	}
 
 	while (pairs.length < minPairs) {
-		const m1 = randomPick(
-			members,
-			members.map(p => left.get(p)!),
-		);
+		const m1 = pickRandom(members, left);
 		const m1pw = members.indexOf(m1) / members.length;
-		const m2 = randomPick(
-			members,
-			members.map(p => left.get(p)!),
-		);
+		const m2 = pickRandom(members, left);
 		const m2pw = members.indexOf(m2) / members.length;
 
 		decreaseLeftGame(left, [m1, m2]);
@@ -126,7 +141,9 @@ export const generateHardGamePairs = (
 	return pairs;
 };
 
-/** Match senior and junior */
+/**
+ * Generate fun game pairs.
+ */
 export const generateFunGamePairs = (
 	members: string[],
 	count: number,
@@ -135,22 +152,15 @@ export const generateFunGamePairs = (
 	const left = initLeftGames([members], count);
 
 	// Split teams two half
-	const half = Math.floor(members.length / 2);
-	const [t1, t2] = [members.slice(0, half), members.slice(half)];
+	const [t1, t2] = splitHalf(members);
 
 	const pairs: Pair[] = [];
 	for (;;) {
 		if (allNonPositive(left) && pairs.length >= minPairs) break;
 
-		const m1 = randomPick(
-			t1,
-			t1.map(p => left.get(p)!),
-		);
+		const m1 = pickRandom(t1, left);
 		const m1pw = members.indexOf(m1) / members.length;
-		const m2 = randomPick(
-			t2,
-			t2.map(p => left.get(p)!),
-		);
+		const m2 = pickRandom(t2, left);
 		const m2pw = members.indexOf(m2) / members.length;
 
 		decreaseLeftGame(left, [m1, m2]);
@@ -180,6 +190,79 @@ export const findGames = (
 	} else {
 		pairs1 = pairMethod(team1, count);
 		pairs2 = pairMethod(team2, count, pairs1.length);
+	}
+
+	// Sort by power
+	pairs1.sort((a, b) => b.power - a.power);
+	pairs2.sort((a, b) => b.power - a.power);
+
+	// Create games
+	const games: CourtGame[] = [];
+	for (let i = 0; i < pairs1.length; i++) {
+		const p1 = pairs1[i];
+		const p2 = pairs2[i];
+		games.push(newCourtGame([p1.mem1, p1.mem2], [p2.mem1, p2.mem2]));
+	}
+
+	return games;
+};
+
+/**
+ * Generate rand game pairs (mixed doubles)
+ */
+export const generateRandMixedGamePairs = (
+	mMembers: string[],
+	fMembers: string[],
+	count: number,
+	minPairs: number = 0,
+): Pair[] => {
+	const left = initLeftGames([mMembers, fMembers], count);
+
+	const pairs: Pair[] = [];
+
+	for (;;) {
+		if (allNonPositive(left) && pairs.length >= minPairs) break;
+
+		const x1 = pickRandom(mMembers, left);
+		const x1pw = mMembers.indexOf(x1) / mMembers.length;
+		const x2 = pickRandom(fMembers, left);
+		const x2pw = fMembers.indexOf(x2) / fMembers.length;
+
+		decreaseLeftGame(left, [x1, x2]);
+
+		pairs.push({
+			mem1: x1,
+			mem2: x2,
+			power: calcMixedPower(x1pw, x2pw),
+		});
+	}
+
+	return pairs;
+};
+
+/**
+ * Find mixed games
+ */
+export const findMixedGames = (
+	m1: string[],
+	m2: string[],
+	f1: string[],
+	f2: string[],
+	count: number,
+	pairMethod: (
+		m: string[],
+		f: string[],
+		count: number,
+		minPairs?: number,
+	) => Pair[],
+) => {
+	let pairs1 = pairMethod(m1, f1, count);
+	let pairs2 = pairMethod(m2, f2, count);
+	if (pairs1.length < pairs2.length) {
+		pairs1 = pairMethod(m1, f1, count, pairs2.length);
+	}
+	if (pairs2.length < pairs1.length) {
+		pairs2 = pairMethod(m2, f2, count, pairs1.length);
 	}
 
 	// Sort by power
@@ -275,6 +358,30 @@ const updatePlayers = (
 	return Array.from(playerSet.values());
 };
 
+const genMatchResultsFromGames = (
+	mPlayers: string[],
+	fPlayers: string[],
+	games: CourtGame[],
+	courts: number,
+): MatchResult => {
+	const allGames = () => [...games];
+
+	// Assign courts.
+	// Repeat some times, and pick the best one
+	let bestGames: GameSet[] = assignCourts(allGames(), courts);
+	for (let i = 0; i < 10; i++) {
+		const games = assignCourts(allGames(), courts);
+		if (games.length < bestGames.length) {
+			bestGames = games;
+		}
+	}
+
+	return {
+		players: updatePlayers(mPlayers, fPlayers, bestGames),
+		games: bestGames,
+	};
+};
+
 /**
  * Find two team games
  */
@@ -290,31 +397,43 @@ export const findTwoTeamGames = (x: InputStruct): MatchResult => {
 	const ffFun = findGames(team1f, team2f, x.fFunGames, generateFunGamePairs);
 	const mmHard = findGames(team1m, team2m, x.mHardGames, generateHardGamePairs);
 	const ffHard = findGames(team1f, team2f, x.fHardGames, generateHardGamePairs);
+	const xGames = findMixedGames(
+		team1m,
+		team2m,
+		team1f,
+		team2f,
+		x.xGames,
+		generateRandMixedGamePairs,
+	);
+	console.log(x.xGames, xGames);
 
-	const allGames = [...mmFun, ...ffFun, ...mmHard, ...ffHard];
-
-	// Assign courts.
-	// Repeat some times, and pick the best one
-	let bestGames: GameSet[] = assignCourts(
-		[...mmFun, ...ffFun, ...mmHard, ...ffHard],
+	return genMatchResultsFromGames(
+		[...team1m, ...team2m],
+		[...team1f, ...team2f],
+		[...mmFun, ...ffFun, ...mmHard, ...ffHard, ...xGames],
 		x.numCourts,
 	);
-	for (let i = 0; i < 10; i++) {
-		const games = assignCourts(
-			[...mmFun, ...ffFun, ...mmHard, ...ffHard],
-			x.numCourts,
-		);
-		if (games.length < bestGames.length) {
-			bestGames = games;
+};
+
+export const reassignCourts = (
+	result: MatchResult,
+	courts: number,
+): MatchResult => {
+	// Extract players
+	const mPlayers = result.players
+		.filter(x => x.gender === "M")
+		.map(x => x.name);
+	const fPlayers = result.players
+		.filter(x => x.gender === "F")
+		.map(x => x.name);
+
+	// Extract all games
+	const allGames: CourtGame[] = [];
+	for (const gs of result.games) {
+		for (const g of gs) {
+			allGames.push(g);
 		}
 	}
 
-	return {
-		players: updatePlayers(
-			[...team1m, ...team2m],
-			[...team1f, ...team2f],
-			bestGames,
-		),
-		games: bestGames,
-	};
+	return genMatchResultsFromGames(mPlayers, fPlayers, allGames, courts);
 };

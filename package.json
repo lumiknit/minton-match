@@ -13,7 +13,8 @@
 	},
 	"dependencies": {
 		"@picocss/pico": "^2.0.6",
-		"solid-js": "^1.8.20"
+		"solid-js": "^1.8.20",
+		"xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
 	},
 	"devDependencies": {
 		"eslint": "^9.9.0",

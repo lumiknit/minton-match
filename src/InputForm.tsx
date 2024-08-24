@@ -28,8 +28,7 @@ const InputForm: Component<Props> = props => {
 	let fHardGamesRef: HTMLInputElement | null = null;
 
 	// Mixed
-	let xFunGamesRef: HTMLInputElement | null = null;
-	let xHardGamesRef: HTMLInputElement | null = null;
+	let xGamesRef: HTMLInputElement | null = null;
 
 	const packInput = (): InputStruct => ({
 		mPlayers1: mPlayers1(),
@@ -41,8 +40,7 @@ const InputForm: Component<Props> = props => {
 		mHardGames: parseInt(mHardGamesRef!.value),
 		fFunGames: parseInt(fFunGamesRef!.value),
 		fHardGames: parseInt(fHardGamesRef!.value),
-		xFunGames: parseInt(xFunGamesRef!.value),
-		xHardGames: parseInt(xHardGamesRef!.value),
+		xGames: parseInt(xGamesRef!.value),
 	});
 
 	const unpackInput = (x: InputStruct) => {
@@ -56,8 +54,7 @@ const InputForm: Component<Props> = props => {
 		mHardGamesRef!.value = x.mHardGames.toString();
 		fFunGamesRef!.value = x.fFunGames.toString();
 		fHardGamesRef!.value = x.fHardGames.toString();
-		xFunGamesRef!.value = x.xFunGames.toString();
-		xHardGamesRef!.value = x.xHardGames.toString();
+		xGamesRef!.value = x.xGames.toString();
 	};
 
 	const handleMPlayers1Change = (value: string) => {
@@ -105,11 +102,10 @@ const InputForm: Component<Props> = props => {
 		const mHardGames = parseInt(mHardGamesRef!.value);
 		const fFunGames = parseInt(fFunGamesRef!.value);
 		const fHardGames = parseInt(fHardGamesRef!.value);
-		const xFunGames = parseInt(xFunGamesRef!.value);
-		const xHardGames = parseInt(xHardGamesRef!.value);
+		const xFunGames = parseInt(xGamesRef!.value);
 
-		setMGames(mFunGames + mHardGames + xFunGames + xHardGames);
-		setFGames(fFunGames + fHardGames + xFunGames + xHardGames);
+		setMGames(mFunGames + mHardGames + xFunGames);
+		setFGames(fFunGames + fHardGames + xFunGames);
 		saveInputStruct(packInput());
 	};
 
@@ -128,16 +124,12 @@ const InputForm: Component<Props> = props => {
 	return (
 		<>
 			<h1>민턴 매치</h1>
-
 			<h2> 명단 </h2>
-
 			<p>
 				아래 명단에 이름을 <b>실력순으로</b> 작성해주세요! 제일 위에 있는 사람이
 				제일 실력이 좋은 사람입니다.
 			</p>
-
 			<h3> 팀 1 </h3>
-
 			<div class="half">
 				<div>
 					<label>
@@ -160,9 +152,7 @@ const InputForm: Component<Props> = props => {
 					</label>
 				</div>
 			</div>
-
 			<h3> 팀 2 </h3>
-
 			<div class="half">
 				<div>
 					<label>
@@ -185,25 +175,18 @@ const InputForm: Component<Props> = props => {
 					</label>
 				</div>
 			</div>
-
 			<h3> 코트 </h3>
-
 			<label>
 				코트 수
 				<input ref={numCourtsRef!} type="number" value="3" />
 			</label>
-
-			<h3> 인당 게임 횟수 </h3>
-
+			<h3> 인당 최소 게임 횟수 </h3>
 			<p>
-				<b>즐겜</b>: 실력 차이 심한 두 사람을 한 팀으로
+				<b>즐겜</b> = 실력 차이 심한 두 사람을 한 팀으로, &nbsp;
+				<b>빡겜</b> = 실력 비슷한 두 사람을 한 팀으로
 			</p>
-			<p>
-				<b>빡겜</b>: 실력 비슷한 두 사람을 한 팀으로
-			</p>
-
 			<div class="half">
-				<label>
+				<div>
 					남복 즐겜 수
 					<input
 						ref={mFunGamesRef!}
@@ -211,9 +194,9 @@ const InputForm: Component<Props> = props => {
 						value="0"
 						onChange={handleUpdateGames}
 					/>
-				</label>
+				</div>
 
-				<label>
+				<div>
 					여복 즐겜 수
 					<input
 						ref={fFunGamesRef!}
@@ -221,11 +204,10 @@ const InputForm: Component<Props> = props => {
 						value="0"
 						onChange={handleUpdateGames}
 					/>
-				</label>
+				</div>
 			</div>
-
 			<div class="half">
-				<label>
+				<div>
 					남복 빡겜 수
 					<input
 						ref={mHardGamesRef!}
@@ -233,9 +215,9 @@ const InputForm: Component<Props> = props => {
 						value="0"
 						onChange={handleUpdateGames}
 					/>
-				</label>
+				</div>
 
-				<label>
+				<div>
 					여복 빡겜 수
 					<input
 						ref={fHardGamesRef!}
@@ -243,35 +225,20 @@ const InputForm: Component<Props> = props => {
 						value="0"
 						onChange={handleUpdateGames}
 					/>
-				</label>
+				</div>
 			</div>
-
 			<label>
 				혼복 즐겜 수
 				<input
-					ref={xFunGamesRef!}
+					ref={xGamesRef!}
 					type="number"
 					value="0"
 					onChange={handleUpdateGames}
 				/>
 			</label>
-
-			<label>
-				혼복 빡겜 수
-				<input
-					ref={xHardGamesRef!}
-					type="number"
-					value="0"
-					onChange={handleUpdateGames}
-				/>
-			</label>
-
-			<div class="half">
-				<label>남자 최소 {mGames()} 게임</label>
-
-				<label>여자 최소 {fGames()} 게임</label>
-			</div>
-
+			위처럼 설정하면
+			<b> 남자 최소 {mGames()} 게임</b>과 <b>여자 최소 {fGames()} 게임</b>이
+			생성됩니다.
 			<button class="w-100" onClick={handleSubmitClick}>
 				만들기!!
 			</button>

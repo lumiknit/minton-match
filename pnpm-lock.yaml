@@ -13,6 +13,9 @@ importers:
       solid-js:
         specifier: ^1.8.20
         version: 1.8.21
+      xlsx:
+        specifier: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+        version: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
     devDependencies:
       eslint:
         specifier: ^9.9.0
@@ -1986,6 +1989,12 @@ packages:
       }
     engines: { node: ">=10" }
 
+  xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz:
+    resolution: { tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz }
+    version: 0.20.3
+    engines: { node: ">=0.8" }
+    hasBin: true
+
   y18n@5.0.8:
     resolution:
       {
@@ -3095,6 +3104,8 @@ snapshots:
       ansi-styles: 4.3.0
       string-width: 4.2.3
       strip-ansi: 6.0.1
+
+  xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz: {}
 
   y18n@5.0.8: {}
 
